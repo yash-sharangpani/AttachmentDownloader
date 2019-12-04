@@ -1,10 +1,11 @@
 import imaplib
 import os
 import email as emp
-
+import patoolib
 
 email_user = input('Email: ')
 email_pass = input('Password: ')
+
 
 basePath = 'C:\\Users\\Manas\\Desktop\\downloadAttachment\\'
 
@@ -15,7 +16,6 @@ mail.select("inbox")
 
 
 eMailID = ["abc@gmail.com", "xyz@gmail.com"]
-
 Dict = {"abc@gmail.com": 'abc', "xyz@gmail.com": 'xyz'}
 
 
@@ -28,7 +28,7 @@ for email in eMailID:
 
     mail_ids = data[0]
     id_list = mail_ids.split()
-
+    print("Downloading attachments")
     for num in data[0].split():
         typ, data = mail.fetch(num, '(RFC822)')
         raw_email = data[0][1]
@@ -37,13 +37,11 @@ for email in eMailID:
         email_message = emp.message_from_string(raw_email_string)
         # downloading attachments
         for part in email_message.walk():
-
             if part.get_content_maintype() == 'multipart':
                 continue
             if part.get('Content-Disposition') is None:
                 continue
             fileName = part.get_filename()
-
             if bool(fileName):
                 subFolder = Dict[email]
                 path = basePath + subFolder
@@ -61,3 +59,9 @@ for email in eMailID:
 
                 subject = str(email_message).split("Subject: ", 1)[1].split("\nTo:", 1)[0]
                 print('Downloaded "{file}" from email titled "{subject} and saving to {subFolder}"'.format(file=fileName, subject=subject, subFolder=Dict[email]))
+                fileExtension = str(fileName).split(".")[-1]
+                print(fileExtension)
+                if fileExtension == 'rar' or fileExtension == 'zip':
+                    print("Decompressing file: " + fileName)
+                    patoolib.extract_archive(filePath, outdir=path)
+
